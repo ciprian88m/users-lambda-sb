@@ -1,0 +1,7 @@
+cognito:
+  region: eu-central-1
+  user-pool-id: #replaceMe
+  client-id: #replaceMe
+spring:
+  main:
+    banner-mode: off

@@ -1,0 +1,4 @@
+cognito:
+  region: ${REGION}
+  user-pool-id: ${USER_POOL_ID}
+  client-id: ${CLIENT_ID}

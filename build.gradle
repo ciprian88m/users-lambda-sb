@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.1'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'dev.ciprian'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '21'
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('serverlessVersion', '2.0.0-M2')
+    set('awsVersion', '2.22.9')
+    set('awsXrayVersion', '2.11.0')
+}
+
+dependencies {
+    compileOnly 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // AWS serverless
+    implementation "com.amazonaws.serverless:aws-serverless-java-container-springboot3:$serverlessVersion"
+
+    // AWS libraries
+    implementation platform("software.amazon.awssdk:bom:$awsVersion")
+    implementation platform("com.amazonaws:aws-xray-recorder-sdk-bom:$awsXrayVersion")
+    implementation('software.amazon.awssdk:cognitoidentityprovider') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('software.amazon.awssdk:apache-client') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('com.amazonaws:aws-xray-recorder-sdk-core') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation('com.amazonaws:aws-xray-recorder-sdk-aws-sdk') {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+    implementation 'com.amazonaws:aws-xray-recorder-sdk-aws-sdk-instrumentor'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "com.amazonaws.serverless:aws-serverless-java-container-core:$serverlessVersion"
+    testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.register('buildZip', Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from(configurations.compileClasspath) {
+            exclude 'tomcat-embed-*'
+        }
+    }
+}
+
+build.dependsOn buildZip
